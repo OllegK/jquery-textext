@@ -423,13 +423,18 @@
 		}
 		else if(source.is(CSS_DOT_REMOVE))
 		{
+			//calling handler for removing tag; allow bind('tagRemove'...
+			tag = source.parents(CSS_DOT_TAG + ':first');
+			self.trigger('tagRemove', tag, tag.data(CSS_TAG));
+			
 			self.removeTag(source.parents(CSS_DOT_TAG + ':first'));
 			focus = 1;
 		}
 		else if(source.is(CSS_DOT_LABEL))
 		{
 			tag = source.parents(CSS_DOT_TAG + ':first');
-			self.trigger(EVENT_TAG_CLICK, tag, tag.data(CSS_TAG), tagClickCallback);
+			self.trigger(EVENT_TAG_CLICK, tag, tag.data(CSS_TAG), tagClickCallback, e.pageX, e.pageY); //parameters for X, Y; 
+				//allow .bind('tagClick', function(e, tag, val, callback, pageX, pageY) {
 		}
 
 		function tagClickCallback(newValue, refocus)
@@ -474,6 +479,10 @@
 			// refocus the textarea just in case it lost the focus
 			self.core().focusInput();
 		}
+		
+		//clear the filter on suggestions list 
+		this.trigger('getSuggestions', {query : ""});
+		this.trigger('toggleDropdown');			
 	};
 
 	//--------------------------------------------------------------------------------
@@ -671,6 +680,12 @@
 		self.updateFormCache();
 		core.getFormData();
 		core.invalidateBounds();
+		
+		//re-filter the suggestions to allow the removed tag to be put back into suggestion list
+		//needed if code using the plugin updates the list of suggestions on adding/removing the tag
+		this.trigger('getSuggestions', {query : ""});
+		//this.trigger('toggleDropdown');		
+		
 	};
 
 	/**
